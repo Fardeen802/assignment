@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: agencydesk
+      POSTGRES_PASSWORD: agencydesk
+      POSTGRES_DB: agencydesk
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - agencydesk_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agencydesk -d agencydesk"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+volumes:
+  agencydesk_db:
