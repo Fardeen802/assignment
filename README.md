@@ -4,13 +4,11 @@ AgencyDesk is a multi-tenant workspace for agency project boards, time, files, a
 
 ## Run the demo
 
-Use Node.js 22.12+ or 24 and npm. From the repository root:
+Use Node.js 22.12+ or 24 and npm. This setup uses embedded PostgreSQL and requires no Docker daemon. Run these commands from the repository root.
 
 ```sh
-npm ci
-npm run seed
-npm run build
-npm start
+unset DATABASE_URL
+npm ci && npm run seed && npm run build && npm start
 ```
 
 Open [AgencyDesk on localhost](http://127.0.0.1:3000). The default uses PGlite, an embedded PostgreSQL engine, and stores data in `data/`. Use one server process per embedded database. The seed command creates the demo records if absent, and it can run again after the server stops. For frontend development, leave the API running on port 3000 and run `npm run dev` in a second terminal.
@@ -24,17 +22,23 @@ Open [AgencyDesk on localhost](http://127.0.0.1:3000). The default uses PGlite, 
 
 All demo accounts use `agencydesk-demo`. The sign-in screen has buttons to prefill each account.
 
-## Standalone PostgreSQL
+## Optional standalone PostgreSQL
 
-Use an empty PostgreSQL 17 database or start the included local service:
+To use the included PostgreSQL 17 container, start Docker Desktop and wait until `docker info` succeeds.
 
 ```sh
-docker compose up -d --wait
-export DATABASE_URL=postgresql://agencydesk:agencydesk@127.0.0.1:5434/agencydesk
-npm run seed
-npm run build
-npm start
+(
+  set -e
+  docker compose up -d --wait
+  export DATABASE_URL=postgresql://agencydesk:agencydesk@127.0.0.1:5434/agencydesk
+  npm ci
+  npm run seed
+  npm run build
+  npm start
+)
 ```
+
+If Docker reports a missing socket or AgencyDesk reports `ECONNREFUSED 127.0.0.1:5434`, return to the embedded setup above. Run `unset DATABASE_URL` in the same terminal to clear any earlier export. You can also point `DATABASE_URL` at a reachable standalone PostgreSQL 17 database.
 
 The server and seed command apply the tracked SQL migration automatically. The bundled data and compose credentials are for local evaluation. For a hosted environment, use TLS with `SECURE_COOKIES=1`, configure database credentials, and provision memberships without the demo seed.
 
